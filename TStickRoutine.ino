@@ -44,19 +44,25 @@ void TStickRoutine() {
     outAccel[1] = a.acceleration.y / 9.80665F;
     outAccel[2] = a.acceleration.z / 9.80665F;
 
-    mapper_signal_update(sigRawAccel, outAccel, 3, tt);
+    mapper_signal_update(sigRawAccelX, &outAccel[0], 1, tt);
+    mapper_signal_update(sigRawAccelY, &outAccel[1], 1, tt);
+    mapper_signal_update(sigRawAccelZ, &outAccel[2], 1, tt);
 
     outMag[0] = m.magnetic.x;
     outMag[1] = m.magnetic.y;
     outMag[2] = m.magnetic.z;
 
-    mapper_signal_update(sigRawMag, outMag, 3, tt);
+    mapper_signal_update(sigRawMagX, &outMag[0], 1, tt);
+    mapper_signal_update(sigRawMagY, &outMag[1], 1, tt);
+    mapper_signal_update(sigRawMagZ, &outMag[2], 1, tt);
 
     outGyro[0] = g.gyro.x;
     outGyro[1] = g.gyro.y;
     outGyro[2] = g.gyro.z;
 
-    mapper_signal_update(sigRawGyro, outGyro, 3, tt);
+    mapper_signal_update(sigRawGyroX, &outGyro[0], 1, tt);
+    mapper_signal_update(sigRawGyroY, &outGyro[1], 1, tt);
+    mapper_signal_update(sigRawGyroZ, &outGyro[2], 1, tt);
 
     int pressure = analogRead(pressurePin);
     if (calibrate == 1) {
@@ -84,7 +90,10 @@ void TStickRoutine() {
     lastUpdateQuat = NowQuat;
     MadgwickQuaternionUpdate(outAccel[0], outAccel[1], outAccel[2], outGyro[0]*PI / 180.0f, outGyro[1]*PI / 180.0f, outGyro[2]*PI / 180.0f, outMag[0], outMag[1], outMag[2]);
 
-    mapper_signal_update(sigOrientation, q, 4, tt);
+    mapper_signal_update(sigOrientationQ1, &q[0], 1, tt);
+    mapper_signal_update(sigOrientationQ2, &q[1], 1, tt);
+    mapper_signal_update(sigOrientationQ3, &q[2], 1, tt);
+    mapper_signal_update(sigOrientationQ4, &q[3], 1, tt);
 
     ledBlink();
     then = now;

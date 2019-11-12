@@ -144,20 +144,29 @@ char one[3] = "1";
 ////////////////////////
 mapper_device dev;
 mapper_signal sigRawCapsense;
-mapper_signal sigRawGyro;
-mapper_signal sigRawAccel;
-mapper_signal sigRawMag;
+mapper_signal sigRawGyroX;
+mapper_signal sigRawGyroY;
+mapper_signal sigRawGyroZ;
+mapper_signal sigRawAccelX;
+mapper_signal sigRawAccelY;
+mapper_signal sigRawAccelZ;
+mapper_signal sigRawMagX;
+mapper_signal sigRawMagY;
+mapper_signal sigRawMagZ;
 mapper_signal sigRawPressure;
 mapper_signal sigRawPiezo;
-mapper_signal sigOrientation;
+mapper_signal sigOrientationQ1;
+mapper_signal sigOrientationQ2;
+mapper_signal sigOrientationQ3;
+mapper_signal sigOrientationQ4;
 
 int sigRawCapsenseMin[2] = { 0, 0 }, sigRawCapsenseMax[2] = { 1, 1 };
-float sigRawGyroMin[3] = { -180.0f, -180.0f, -180.0f }, sigRawGyroMax[3] = { 180.0f, 180.0f, 180.0f };
-float sigRawAccelMin[3] = { -1.0f, -1.0f, -1.0f }, sigRawAccelMax[3] = { 1.0f, 1.0f, 1.0f  };
-float sigRawMagMin[3] = { -1.0f, -1.0f, -1.0f }, sigRawMagMax[3] = { 1.0f, 1.0f, 1.0f  };
+float sigRawGyroMin[1] = { -180.0f }, sigRawGyroMax[1] = { 180.0f };
+float sigRawAccelMin[1] = { -1.0f }, sigRawAccelMax[1] = { 1.0f };
+float sigRawMagMin[1] = { -1.0f }, sigRawMagMax[1] = { 1.0f };
 int sigRawPressureMin[1] = { 0 }, sigRawPressureMax[1] = { 4095 };
 int sigRawPiezoMin[1] = { 0 }, sigRawPiezoMax[1] = { 4095 };
-float sigOrientationMin[4] = { -1.0f, -1.0f, -1.0f, -1.0f }, sigOrientationMax[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+float sigOrientationMin[1] = { -1.0f }, sigOrientationMax[1] = { 1.0f };
 
 //////////////////////////
 // LSM9DS1 Library Init //
@@ -251,10 +260,6 @@ int buttonState = 0;         // variable for reading the pushbutton status
 
 
 void setup() {
-
-
-    //wifiManager.setDebugOutput(true);
-
     Serial.begin(115200);
     if (DEBUG == true) {
         Serial.println("\n Starting");
@@ -269,8 +274,6 @@ void setup() {
     memcpy(APpasswdValidate, APpasswd, 15);
     memcpy(APpasswdTemp, APpasswd, 15);
 
-    // Starting WiFiManager in Trigger Mode
-    // Wifimanager_init(DEBUG);
     WiFi.begin("MathiasB", "yoloyolo");
 
     while (WiFi.status() != WL_CONNECTED) {
@@ -297,158 +300,28 @@ void setup() {
         Serial.println("Setup complete.");
     }
 
-    // #if defined(ESP32)
-    //   if (WiFi.status() != WL_CONNECTED) {
-    //     if (DEBUG == true) {Serial.println("ESP32 3rd attempt to connect");}
-    //     WiFi.begin(stored_ssid, stored_psk);
-    //     if (DEBUG == true) {
-    //       if (WiFi.status() != WL_CONNECTED) {Serial.println("Connected on 3rd attempt");}
-    //       else {Serial.println("Failed to connect, finishing setup anyway");}
-    //     }
-    //   }
-    // #endif
-
     dev = mapper_device_new("T-Stick", 0, 0);
 
     sigRawCapsense = mapper_device_add_output_signal(dev, "RawCapsense", 2, 'i', 0, sigRawCapsenseMin, sigRawCapsenseMax);
-    sigRawGyro = mapper_device_add_output_signal(dev, "RawGyro", 3, 'f', 0, sigRawGyroMin, sigRawGyroMax);
-    sigRawAccel = mapper_device_add_output_signal(dev, "RawAccel", 3, 'f', 0, sigRawAccelMin, sigRawAccelMax);
-    sigRawMag = mapper_device_add_output_signal(dev, "RawMag", 3, 'f', 0, sigRawMagMin, sigRawMagMax);
+    sigRawGyroX = mapper_device_add_output_signal(dev, "RawGyroX", 1, 'f', 0, sigRawGyroMin, sigRawGyroMax);
+    sigRawGyroY = mapper_device_add_output_signal(dev, "RawGyroY", 1, 'f', 0, sigRawGyroMin, sigRawGyroMax);
+    sigRawGyroZ = mapper_device_add_output_signal(dev, "RawGyroZ", 1, 'f', 0, sigRawGyroMin, sigRawGyroMax);
+    sigRawAccelX = mapper_device_add_output_signal(dev, "RawAccelX", 1, 'f', 0, sigRawAccelMin, sigRawAccelMax);
+    sigRawAccelY = mapper_device_add_output_signal(dev, "RawAccelY", 1, 'f', 0, sigRawAccelMin, sigRawAccelMax);
+    sigRawAccelZ = mapper_device_add_output_signal(dev, "RawAccelZ", 1, 'f', 0, sigRawAccelMin, sigRawAccelMax);
+    sigRawMagX = mapper_device_add_output_signal(dev, "RawMagX", 1, 'f', 0, sigRawMagMin, sigRawMagMax);
+    sigRawMagY = mapper_device_add_output_signal(dev, "RawMagY", 1, 'f', 0, sigRawMagMin, sigRawMagMax);
+    sigRawMagZ = mapper_device_add_output_signal(dev, "RawMagZ", 1, 'f', 0, sigRawMagMin, sigRawMagMax);
     sigRawPressure = mapper_device_add_output_signal(dev, "RawPressure", 1, 'i', 0, sigRawPressureMin, sigRawPressureMax);
     sigRawPiezo = mapper_device_add_output_signal(dev, "RawPiezo", 1, 'i', 0, sigRawPiezoMin, sigRawPiezoMax);
-    sigOrientation = mapper_device_add_output_signal(dev, "Orientation", 4, 'f', 0, sigOrientationMin, sigOrientationMax);
+    sigOrientationQ1 = mapper_device_add_output_signal(dev, "OrientationQ1", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
+    sigOrientationQ2 = mapper_device_add_output_signal(dev, "OrientationQ2", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
+    sigOrientationQ3 = mapper_device_add_output_signal(dev, "OrientationQ3", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
+    sigOrientationQ4 = mapper_device_add_output_signal(dev, "OrientationQ4", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
 }
 
 void loop() {
-
-
-    // Calling WiFiManager configuration portal
-    // buttonState = digitalRead(buttonPin);
-    //if ( outAccel[0] > 1 && interTouch[0] == 9 && interTouch[1] == 144 ) {
-    // if ( buttonState == LOW ) {
-    //   digitalWrite(ledPin, HIGH);
-    //   Wifimanager_portal(device, APpasswd, true, DEBUG);
-    // }
-
-    // byte dataRec = OSCMsgReceive();
-
-    // if (dataRec) { //Check for OSC messages from host computers
-    //   if (DEBUG) {
-    //     Serial.println();
-    //     for (int i = 0; i < 4; i++) {
-    //       Serial.printf("From computer %d: ", i); Serial.println(bufferFromHost[i]);
-    //     }
-    //     Serial.println();
-    //   }
-    //   char message = bufferFromHost[0];
-
-    //   OSCMessage msg0("/information");
-
-    //   switch (message) {
-    //     case 's': // start message,
-    //       msg0.add(infoTstick[0]);
-    //       msg0.add(infoTstick[1]);
-    //       oscEndpoint.beginPacket(oscEndpointIP, oscEndpointPORT);
-    //       msg0.send(oscEndpoint);
-    //       oscEndpoint.endPacket();
-    //       msg0.empty();
-
-    //       started = millis();
-    //       break;
-    //     case 'x': // stop message,
-    //       started = 0;
-    //       break;
-    //     case 'c': // calibrate message
-    //       switch (bufferFromHost[1]) {
-    //         case 1: // FSR calibration
-    //           calibrationData[0] = bufferFromHost[2];
-    //           calibrationData[1] = bufferFromHost[3];
-    //           calibrate = 1;
-    //           bufferFromHost[1] = 0;
-    //           bufferFromHost[2] = 0;
-    //           bufferFromHost[3] = 0;
-    //           break;
-    //         default:
-    //           calibrate = 0;
-    //           break;
-    //       }
-    //       break;
-    //     case 'w':     //write settings
-    //       switch ((char)bufferFromHost[1]) {
-    //         case 'i': //write info
-    //           infoTstick[0] = bufferFromHost[2];
-    //           infoTstick[1] = bufferFromHost[3];
-    //           bufferFromHost[1] = 0;
-    //           bufferFromHost[2] = 0;
-    //           bufferFromHost[3] = 0;
-    //           break;
-    //         case 'T': //write touch mask
-    //           touchMask[0] = bufferFromHost[2];
-    //           touchMask[1] = bufferFromHost[3];
-    //           bufferFromHost[1] = 0;
-    //           bufferFromHost[2] = 0;
-    //           bufferFromHost[3] = 0;
-    //           break;
-    //         case 'w': // write settings to memory (json)
-    //           save_to_json(DEBUG);
-    //           bufferFromHost[1] = 0;
-    //           break;
-    //         case 'r': // sending the config info trough OSC
-    //           msg0.add(infoTstick[0]);
-    //           msg0.add(infoTstick[1]);
-    //           msg0.add(calibrate);
-    //           msg0.add(calibrationData[0]);
-    //           msg0.add(calibrationData[1]);
-    //           msg0.add(touchMask[0]);
-    //           msg0.add(touchMask[1]);
-    //           oscEndpoint.beginPacket(oscEndpointIP, oscEndpointPORT);
-    //           msg0.send(oscEndpoint);
-    //           oscEndpoint.endPacket();
-    //           msg0.empty();
-    //           bufferFromHost[1] = 0;
-    //           break;
-    //         default:
-    //           break;
-    //       }
-    //     default:
-    //       break;
-    //   }
-    // }
-
-    now = millis();
-
-//   if (directSendOSC == 0) {
-//     if (now < started + 2000) { // needs a ping/keep-alive every 2 seconds or less or will time-out
-//       TStickRoutine();
-//     }
-//     else { // runs when there's no ping/keep-alive
-//       now = millis();
-
-//       // Calling configuration portal if the T-Stick is disconnected
-// //      if (millis() - lastRead > interval) {
-// //        lastRead = millis();
-// //        pressure = analogRead(pressurePin);
-// //        //if (DEBUG) {Serial.print("Pressure sensor: "); Serial.println(pressure);}
-// //      }
-//       //if ( pressure > 4090 ) {
-//       if ( buttonState == LOW ) {
-//         digitalWrite(ledPin, HIGH);
-//         Wifimanager_portal(device, APpasswd, true, DEBUG);
-//       }
-//       else {
-//         if ((now - then) > ledTimer) {
-//           ledBlink();
-//           then = now;
-//         }
-//         else if ( then > now) {
-//           then = 0;
-//         }
-//       }
-//     }
-//   } else {
     TStickRoutine();
-    // }
-
 } // END LOOP
 
 void ledBlink() {
