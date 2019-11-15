@@ -159,14 +159,9 @@ mapper_signal sigOrientationQ1;
 mapper_signal sigOrientationQ2;
 mapper_signal sigOrientationQ3;
 mapper_signal sigOrientationQ4;
-
-int sigRawCapsenseMin[2] = { 0, 0 }, sigRawCapsenseMax[2] = { 1, 1 };
-float sigRawGyroMin[1] = { -180.0f }, sigRawGyroMax[1] = { 180.0f };
-float sigRawAccelMin[1] = { -1.0f }, sigRawAccelMax[1] = { 1.0f };
-float sigRawMagMin[1] = { -1.0f }, sigRawMagMax[1] = { 1.0f };
-int sigRawPressureMin[1] = { 0 }, sigRawPressureMax[1] = { 4095 };
-int sigRawPiezoMin[1] = { 0 }, sigRawPiezoMax[1] = { 4095 };
-float sigOrientationMin[1] = { -1.0f }, sigOrientationMax[1] = { 1.0f };
+mapper_signal sigMagGyro;
+mapper_signal sigMagAccel;
+mapper_signal sigMagMag;
 
 //////////////////////////
 // LSM9DS1 Library Init //
@@ -274,7 +269,7 @@ void setup() {
     memcpy(APpasswdValidate, APpasswd, 15);
     memcpy(APpasswdTemp, APpasswd, 15);
 
-    WiFi.begin("MathiasB", "yoloyolo");
+    WiFi.begin("Graveyard", "yoloyolo");
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -302,6 +297,15 @@ void setup() {
 
     dev = mapper_device_new("T-Stick", 0, 0);
 
+    int sigRawCapsenseMin[2] = { 0, 0 }, sigRawCapsenseMax[2] = { 1, 1 };
+    float sigRawGyroMin[1] = { -1.0f }, sigRawGyroMax[1] = { 1.0f };
+    float sigRawAccelMin[1] = { -1.0f }, sigRawAccelMax[1] = { 1.0f };
+    float sigRawMagMin[1] = { -1.0f }, sigRawMagMax[1] = { 1.0f };
+    int sigRawPressureMin[1] = { analogRead(pressurePin) }, sigRawPressureMax[1] = { 3071 };
+    int sigRawPiezoMin[1] = { 0 }, sigRawPiezoMax[1] = { 4095 };
+    float sigOrientationMin[1] = { -1.0f }, sigOrientationMax[1] = { 1.0f };
+    float sigMagMin[1] = { 0.0f }, sigMagMax[1] = { 1.0f };
+
     sigRawCapsense = mapper_device_add_output_signal(dev, "RawCapsense", 2, 'i', 0, sigRawCapsenseMin, sigRawCapsenseMax);
     sigRawGyroX = mapper_device_add_output_signal(dev, "RawGyroX", 1, 'f', 0, sigRawGyroMin, sigRawGyroMax);
     sigRawGyroY = mapper_device_add_output_signal(dev, "RawGyroY", 1, 'f', 0, sigRawGyroMin, sigRawGyroMax);
@@ -318,6 +322,9 @@ void setup() {
     sigOrientationQ2 = mapper_device_add_output_signal(dev, "OrientationQ2", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
     sigOrientationQ3 = mapper_device_add_output_signal(dev, "OrientationQ3", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
     sigOrientationQ4 = mapper_device_add_output_signal(dev, "OrientationQ4", 1, 'f', 0, sigOrientationMin, sigOrientationMax);
+    sigMagGyro = mapper_device_add_output_signal(dev, "GyroMagnitude", 1, 'f', 0, sigMagMin, sigMagMax);
+    sigMagAccel = mapper_device_add_output_signal(dev, "AccelMagnitude", 1, 'f', 0, sigMagMin, sigMagMax);
+    sigMagMag = mapper_device_add_output_signal(dev, "MagMagnitude", 1, 'f', 0, sigMagMin, sigMagMax);
 }
 
 void loop() {

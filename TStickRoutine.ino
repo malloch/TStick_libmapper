@@ -56,13 +56,21 @@ void TStickRoutine() {
     mapper_signal_update(sigRawMagY, &outMag[1], 1, tt);
     mapper_signal_update(sigRawMagZ, &outMag[2], 1, tt);
 
-    outGyro[0] = g.gyro.x;
-    outGyro[1] = g.gyro.y;
-    outGyro[2] = g.gyro.z;
+    outGyro[0] = g.gyro.x / 180.0f;
+    outGyro[1] = g.gyro.y / 180.0f;
+    outGyro[2] = g.gyro.z / 180.0f;
 
     mapper_signal_update(sigRawGyroX, &outGyro[0], 1, tt);
     mapper_signal_update(sigRawGyroY, &outGyro[1], 1, tt);
     mapper_signal_update(sigRawGyroZ, &outGyro[2], 1, tt);
+
+    float sigMagGyroOut = sqrt(outGyro[0] * outGyro[0] + outGyro[1] * outGyro[1] + outGyro[2] * outGyro[2]);
+    float sigMagAccelOut = sqrt(outAccel[0] * outAccel[0] + outAccel[1] * outAccel[1] + outAccel[2] * outAccel[2]);
+    float sigMagMagOut = sqrt(outMag[0] * outMag[0] + outMag[1] * outMag[1] + outMag[2] * outMag[2]);
+
+    mapper_signal_update(sigMagGyro, &sigMagGyroOut, 1, tt);
+    mapper_signal_update(sigMagAccel, &sigMagAccelOut, 1, tt);
+    mapper_signal_update(sigMagMag, &sigMagMagOut, 1, tt);
 
     int pressure = analogRead(pressurePin);
     if (calibrate == 1) {
